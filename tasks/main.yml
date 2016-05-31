@@ -1,0 +1,31 @@
+---
+- name: create ext volume
+  file: state=directory path={{ ext_graphite_exporter_conf_volume }}
+  tags:
+    - docker
+
+- name: put graphite_mapping.conf
+  template: src=graphite_mapping.conf dest={{ ext_graphite_exporter_conf_volume }}/graphite_mapping.conf
+  tags:
+    - docker
+
+- name: start graphite-exporter container
+  docker:
+    image: prom/graphite-exporter
+    state: started
+    read_only: yes
+    hostname: "ge-{{ ansible_hostname }}"
+    dns:
+      - 8.8.8.8
+    ports:
+      - "9109:9109/udp"
+      - "2003:9109"
+      - "9108:9108"
+    volumes:
+      - "{{ ext_graphite_exporter_conf_volume }}/graphite_mapping.conf:/tmp/graphite_mapping.conf"
+    name: graphite-exporter
+    restart_policy: always
+    restart_policy_retry: 0
+    command: -graphite.mapping-config=/tmp/graphite_mapping.conf
+  tags:
+    - docker

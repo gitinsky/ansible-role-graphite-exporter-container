@@ -1,0 +1,1 @@
+ext_graphite_exporter_conf_volume: /var/lib/docker-extvols/graphite-exporter-conf
